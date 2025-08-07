@@ -1,0 +1,2 @@
+curl -X POST http://observability-nonprod.fxtrt.io:3130/api/logs/insert/elasticsearch/_bulk   -H Content-Type: application/x-ndjson   --data-binary $'{ index: { _index: logs } }\n{ @timestamp: 2025-08-07T09:20:00Z, level: critical, message: Before request [GET /kuchbhi, client=10.6.66.66], application: bla, service.name: bla, env: dev, subsystemName: aws-waf-dev }'
+
